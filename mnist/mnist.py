@@ -109,7 +109,7 @@ class Net(nn.Module):
 class BigNet(nn.Module):
     def __init__(self):
         super(BigNet, self).__init__()
-        self.conv1 = nn.Conv2d(1, 10 * 1, 3)
+        self.conv1 = nn.Conv2d(1, 10 * 2, 3)
         self.conv2 = nn.Conv2d(10 * 2, 10 * 2, 3)
         self.conv3 = nn.Conv2d(10 * 2, 20 * 2, 3)
         self.conv4 = nn.Conv2d(20 * 2, 20 * 2, 3)
@@ -226,5 +226,5 @@ def count_params_for_all_models():
 
 
 if __name__ == '__main__':
-    plot_all_metrics()
-    #count_params_for_all_models()
+    # plot_all_metrics()
+    count_params_for_all_models()
