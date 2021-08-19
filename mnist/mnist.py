@@ -43,6 +43,17 @@ train_loader = torch.utils.data.DataLoader(
                        transforms.Normalize((0.1307,), (0.3081,))
                    ])),
     batch_size=args.batch_size, shuffle=True, **kwargs)
+
+train_loader_rotate = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train=True, download=True,
+                   transform=transforms.Compose([
+                       transforms.ToTensor(),
+                       transforms.Normalize((0.1307,), (0.3081,),
+                       transforms.RandomApply([transforms.RandomRotation((45, 45))], p=0.5),
+)
+                   ])),
+    batch_size=args.batch_size, shuffle=True, **kwargs)
+
 test_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../data', train=False, transform=transforms.Compose([
                        transforms.ToTensor(),
@@ -135,7 +146,7 @@ class BigNet(nn.Module):
 
 
 
-def train(model, optimizer, epoch):
+def train(model, optimizer, epoch, train_loader):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         if args.cuda:
@@ -174,14 +185,14 @@ def test(model):
     return acc_percent.item()
 
 
-def plot_metrics(NetClass, log_file, epochs):
+def plot_metrics(NetClass, log_file, epochs, train_loader):
     model = NetClass()
     if args.cuda:
         model.cuda()
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     start = time.time()
     for epoch in range(1, epochs + 1):
-        train(model, optimizer, epoch)
+        train(model, optimizer, epoch, train_loader)
         acc_percent = test(model)
         print(f'{epoch},{round(acc_percent, 4)},{start},{time.time()}', file=log_file)
 
@@ -192,20 +203,22 @@ def plot_all_metrics():
     for i in range(10):
         train_log = open('logs/cnn_big_no_group_' + str(i).zfill(2) + '.csv', 'w+')
         print('epoch,test_accuracy,start_time,cur_time', file=train_log)
-        plot_metrics(BigNet, train_log, epochs)
+        plot_metrics(BigNet, train_log, epochs, train_loader)
 
-    # TODO add augmented version.
+    for i in range(10):
+        train_log = open('logs/cnn_no_group_' + str(i).zfill(2) + '.csv', 'w+')
+        print('epoch,test_accuracy,start_time,cur_time', file=train_log)
+        plot_metrics(Net, train_log, epochs, train_loader)
 
-    if False:
-        for i in range(10):
-            train_log = open('logs/cnn_no_group_' + str(i).zfill(2) + '.csv', 'w+')
-            print('epoch,test_accuracy,start_time,cur_time', file=train_log)
-            plot_metrics(Net, train_log, epochs)
+    for i in range(10):
+        train_log = open('logs/cnn_group_' + str(i).zfill(2) + '.csv', 'w+')
+        print('epoch,test_accuracy,start_time,cur_time', file=train_log)
+        plot_metrics(GroupNet, train_log, epochs, train_loader)
 
-        for i in range(10):
-            train_log = open('logs/cnn_group_' + str(i).zfill(2) + '.csv', 'w+')
-            print('epoch,test_accuracy,start_time,cur_time', file=train_log)
-            plot_metrics(GroupNet, train_log, epochs)
+    for i in range(10):
+        train_log = open('logs/cnn_big_no_group_aug' + str(i).zfill(2) + '.csv', 'w+')
+        print('epoch,test_accuracy,start_time,cur_time', file=train_log)
+        plot_metrics(BigNet, train_log, epochs, train_loader_rotate)
 
 
 def count_parameters(model):
