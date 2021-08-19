@@ -188,15 +188,27 @@ def plot_metrics(NetClass, log_file, epochs):
 
 def plot_all_metrics():
     epochs = 20
-    for i in range(10):
-        train_log = open('logs/cnn_no_group_' + str(i).zfill(2) + '.csv', 'w+')
-        print('epoch,test_accuracy,start_time,cur_time', file=train_log)
-        plot_metrics(Net, train_log, epochs)
 
     for i in range(10):
-        train_log = open('logs/cnn_group_' + str(i).zfill(2) + '.csv', 'w+')
+        train_log = open('logs/cnn_big_no_group_' + str(i).zfill(2) + '.csv', 'w+')
         print('epoch,test_accuracy,start_time,cur_time', file=train_log)
-        plot_metrics(GroupNet, train_log, epochs)
+        plot_metrics(BigNet, train_log, epochs)
+
+    # TODO add augmented version.
+
+    if False:
+        for i in range(10):
+            train_log = open('logs/cnn_no_group_' + str(i).zfill(2) + '.csv', 'w+')
+            print('epoch,test_accuracy,start_time,cur_time', file=train_log)
+            plot_metrics(Net, train_log, epochs)
+
+        for i in range(10):
+            train_log = open('logs/cnn_group_' + str(i).zfill(2) + '.csv', 'w+')
+            print('epoch,test_accuracy,start_time,cur_time', file=train_log)
+            plot_metrics(GroupNet, train_log, epochs)
+
+
+
 
 
 if __name__ == '__main__':
