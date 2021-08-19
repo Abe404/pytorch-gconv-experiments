@@ -10,6 +10,7 @@ from groupy.gconv.pytorch_gconv.splitgconv2d import P4ConvZ2, P4ConvP4
 from groupy.gconv.pytorch_gconv.pooling import plane_group_spatial_max_pooling
 from torch.nn import MaxPool2d
 import time
+from prettytable import PrettyTable
 
 
 
@@ -107,13 +108,12 @@ class Net(nn.Module):
 
 class BigNet(nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
-        scale = 4
-        self.conv1 = nn.Conv2d(1, 10 * scale, 3)
-        self.conv2 = nn.Conv2d(10 * scale, 10 * scale, 3)
-        self.conv3 = nn.Conv2d(10 * scale, 20 * scale, 3)
-        self.conv4 = nn.Conv2d(20 * scale, 20 * scale, 3)
-        self.fc1 = nn.Linear(4*4*20*scale, 50) 
+        super(BigNet, self).__init__()
+        self.conv1 = nn.Conv2d(1, 10 * 1, 3)
+        self.conv2 = nn.Conv2d(10 * 2, 10 * 2, 3)
+        self.conv3 = nn.Conv2d(10 * 2, 20 * 2, 3)
+        self.conv4 = nn.Conv2d(20 * 2, 20 * 2, 3)
+        self.fc1 = nn.Linear(4*4*20*4, 50) 
         self.fc2 = nn.Linear(50, 10)
 
     def forward(self, x):
@@ -208,8 +208,23 @@ def plot_all_metrics():
             plot_metrics(GroupNet, train_log, epochs)
 
 
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: continue
+        param = parameter.numel()
+        table.add_row([name, param])
+        total_params+=param
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
+    return total_params
 
+def count_params_for_all_models():
+    print('Big Net params:', count_parameters(BigNet()))
+    print('GroupNet params:', count_parameters(GroupNet()))
 
 
 if __name__ == '__main__':
     plot_all_metrics()
+    #count_params_for_all_models()
