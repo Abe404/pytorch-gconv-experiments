@@ -10,6 +10,7 @@ from groupy.gconv.pytorch_gconv.splitgconv2d import P4ConvZ2, P4ConvP4
 from groupy.gconv.pytorch_gconv.pooling import plane_group_spatial_max_pooling
 from torch.nn import MaxPool2d
 import time
+from prettytable import PrettyTable
 
 
 
@@ -198,6 +199,17 @@ def plot_all_metrics():
         print('epoch,test_accuracy,start_time,cur_time', file=train_log)
         plot_metrics(GroupNet, train_log, epochs)
 
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: continue
+        param = parameter.numel()
+        table.add_row([name, param])
+        total_params+=param
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
+    return total_params
 
 if __name__ == '__main__':
     plot_all_metrics()
