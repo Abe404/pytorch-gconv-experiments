@@ -104,6 +104,37 @@ class Net(nn.Module):
         x = self.fc2(x)
         return F.log_softmax(x)
 
+
+class BigNet(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        scale = 4
+        self.conv1 = nn.Conv2d(1, 10 * scale, 3)
+        self.conv2 = nn.Conv2d(10 * scale, 10 * scale, 3)
+        self.conv3 = nn.Conv2d(10 * scale, 20 * scale, 3)
+        self.conv4 = nn.Conv2d(20 * scale, 20 * scale, 3)
+        self.fc1 = nn.Linear(4*4*20*scale, 50) 
+        self.fc2 = nn.Linear(50, 10)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2)
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.max_pool2d(x, 2)
+        x = x.view(x.size()[0], -1)
+
+        #untimeError: mat1 and mat2 shapes cannot be multiplied (64x320 and 1280x50)
+        # print('Net: fc1 x shape = ', x.shape) # 64x320
+
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, training=self.training)
+        x = self.fc2(x)
+        return F.log_softmax(x)
+
+
+
 def train(model, optimizer, epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
